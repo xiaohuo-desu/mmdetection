@@ -166,10 +166,10 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', scale=(1333, 800), keep_ratio=True),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=False),
-    dict(
+"""    dict(
         type='PackDetInputs',
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
-                   'scale_factor', 'instances'))
+                   'scale_factor', 'instances'))"""
 ]
 train_dataloader = dict(  # 训练 dataloader 配置
     batch_size=5,  # 单个 GPU 的 batch size
