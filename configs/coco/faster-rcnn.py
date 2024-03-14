@@ -1,4 +1,4 @@
-pretrained = 'https://download.openmmlab.com/mmclassification/v0/cspnet/cspdarknet50_3rdparty_8xb32_in1k_20220329-bd275287.pth'
+#pretrained = 'https://download.openmmlab.com/mmclassification/v0/cspnet/cspdarknet50_3rdparty_8xb32_in1k_20220329-bd275287.pth'
 
 
 # model settings
@@ -21,7 +21,8 @@ model = dict(
             requires_grad=True),  # 是否训练归一化里的 gamma 和 beta
         norm_eval=True,  # 是否冻结 BN 里的统计项
         style='pytorch',  # 主干网络的风格，'pytorch' 意思是步长为2的层为 3x3 卷积， 'caffe' 意思是步长为2的层为 1x1 卷积
-        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),  # 加载通过 ImageNet 预训练的模型,
+        #init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),  # 加载通过 ImageNet 预训练的模型,
+    ),
     neck=dict(
         type='NASFPN',
         in_channels=[256, 512, 1024, 2048],
@@ -156,7 +157,7 @@ dataset_type = 'CocoDataset'  # 数据集类型，这将被用来定义数据集
 data_root = 'data/coco/'  # 数据集的根目录
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+    dict(type='LoadAnnotations', with_bbox=True, with_mask=False),
     dict(type='Resize', scale=(1333, 800), keep_ratio=True),
     dict(type='RandomFlip', prob=0.5),
     dict(type='PackDetInputs')
@@ -164,15 +165,15 @@ train_pipeline = [
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', scale=(1333, 800), keep_ratio=True),
-    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+    dict(type='LoadAnnotations', with_bbox=True, with_mask=False),
     dict(
         type='PackDetInputs',
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
                    'scale_factor', 'instances'))
 ]
 train_dataloader = dict(  # 训练 dataloader 配置
-    batch_size=2,  # 单个 GPU 的 batch size
-    num_workers=2,  # 单个 GPU 分配的数据加载线程数
+    batch_size=7,  # 单个 GPU 的 batch size
+    num_workers=5,  # 单个 GPU 分配的数据加载线程数
     persistent_workers=True,  # 如果设置为 True，dataloader 在迭代完一轮之后不会关闭数据读取的子进程，可以加速训练
     sampler=dict(  # 训练数据的采样器
         type='DefaultSampler',  # 默认的采样器，同时支持分布式和非分布式训练。请参考 https://mmengine.readthedocs.io/zh_CN/latest/api/generated/mmengine.dataset.DefaultSampler.html#mmengine.dataset.DefaultSampler
@@ -206,7 +207,7 @@ test_dataloader = val_dataloader  # 测试 dataloader 配置
 val_evaluator = dict(  # 验证过程使用的评测器
     type='CocoMetric',  # 用于评估检测和实例分割的 AR、AP 和 mAP 的 coco 评价指标
     ann_file=data_root + 'annotations/instances_val2017.json',  # 标注文件路径
-    metric=['bbox', 'segm'],  # 需要计算的评价指标，`bbox` 用于检测，`segm` 用于实例分割
+    metric=['bbox'],#'segm'  # 需要计算的评价指标，`bbox` 用于检测，`segm` 用于实例分割
     format_only=False)
 test_evaluator = val_evaluator  # 测试过程使用的评测器
 
@@ -214,7 +215,7 @@ optim_wrapper = dict(  # 优化器封装的配置
     type='OptimWrapper',  # 优化器封装的类型。可以切换至 AmpOptimWrapper 来启用混合精度训练
     optimizer=dict(  # 优化器配置。支持 PyTorch 的各种优化器。请参考 https://pytorch.org/docs/stable/optim.html#algorithms
         type='Adam',  # 随机梯度下降优化器
-        lr=0.01,
+        lr=0.0001,
         betas=(0.9, 0.999),
         eps=1e-08,
         weight_decay=0.0001), # 权重衰减
