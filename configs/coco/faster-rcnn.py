@@ -172,7 +172,7 @@ test_pipeline = [
                    'scale_factor', 'instances'))
 ]
 train_dataloader = dict(  # 训练 dataloader 配置
-    batch_size=7,  # 单个 GPU 的 batch size
+    batch_size=5,  # 单个 GPU 的 batch size
     num_workers=5,  # 单个 GPU 分配的数据加载线程数
     persistent_workers=True,  # 如果设置为 True，dataloader 在迭代完一轮之后不会关闭数据读取的子进程，可以加速训练
     sampler=dict(  # 训练数据的采样器
@@ -231,19 +231,18 @@ train_cfg = dict(
 val_cfg = dict(type='ValLoop')  # 验证循环的类型
 test_cfg = dict(type='TestLoop')  # 测试循环的类型
 
-# 将参数调度器修改为 iter-based
 param_scheduler = [
-    # 在 [0, 100) 迭代时使用线性学习率
+    # 在 [0, 2) 迭代时使用线性学习率
     dict(type='LinearLR',
          start_factor=0.001,
          by_epoch=True,
          begin=0,
-         end=5),
-    # 在 [100, 900) 迭代时使用余弦学习率
+         end=2),
+    # 在 [2, 10) 迭代时使用余弦学习率
     dict(type='CosineAnnealingLR',
          T_max=10,
          by_epoch= True,
-         begin=5,
+         begin=2,
          end=10,
          convert_to_iter_based=True)
 ]
