@@ -1,5 +1,3 @@
-custom_imports = dict(imports=['mmpretrain.models'], allow_failed_imports=False)
-
 pretrained = 'https://download.openmmlab.com/mmclassification/v0/cspnet/cspdarknet50_3rdparty_8xb32_in1k_20220329-bd275287.pth'
 
 
