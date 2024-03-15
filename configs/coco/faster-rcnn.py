@@ -166,14 +166,14 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='Resize', scale=(1333, 800), keep_ratio=True),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=False),
-"""    dict(
+    dict(
         type='PackDetInputs',
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
-                   'scale_factor', 'instances'))"""
+                   'scale_factor', 'instances'))
 ]
 train_dataloader = dict(  # 训练 dataloader 配置
-    batch_size=5,  # 单个 GPU 的 batch size
-    num_workers=5,  # 单个 GPU 分配的数据加载线程数
+    batch_size=16,  # 单个 GPU 的 batch size
+    num_workers=14,  # 单个 GPU 分配的数据加载线程数
     persistent_workers=True,  # 如果设置为 True，dataloader 在迭代完一轮之后不会关闭数据读取的子进程，可以加速训练
     sampler=dict(  # 训练数据的采样器
         type='DefaultSampler',  # 默认的采样器，同时支持分布式和非分布式训练。请参考 https://mmengine.readthedocs.io/zh_CN/latest/api/generated/mmengine.dataset.DefaultSampler.html#mmengine.dataset.DefaultSampler
@@ -188,7 +188,7 @@ train_dataloader = dict(  # 训练 dataloader 配置
         pipeline=train_pipeline))  # 这是由之前创建的 train_pipeline 定义的数据处理流程。
 val_dataloader = dict(  # 验证 dataloader 配置
     batch_size=1,  # 单个 GPU 的 Batch size。如果 batch-szie > 1，组成 batch 时的额外填充会影响模型推理精度
-    num_workers=2,  # 单个 GPU 分配的数据加载线程数
+    num_workers=14,  # 单个 GPU 分配的数据加载线程数
     persistent_workers=True,  # 如果设置为 True，dataloader 在迭代完一轮之后不会关闭数据读取的子进程，可以加速训练
     drop_last=False,  # 是否丢弃最后未能组成一个批次的数据
     sampler=dict(
@@ -215,7 +215,7 @@ optim_wrapper = dict(  # 优化器封装的配置
     type='OptimWrapper',  # 优化器封装的类型。可以切换至 AmpOptimWrapper 来启用混合精度训练
     optimizer=dict(  # 优化器配置。支持 PyTorch 的各种优化器。请参考 https://pytorch.org/docs/stable/optim.html#algorithms
         type='Adam',  # 随机梯度下降优化器
-        lr=0.0001,
+        lr=0.02,
         betas=(0.9, 0.999),
         eps=1e-08,
         weight_decay=0.0001), # 权重衰减
@@ -240,7 +240,7 @@ param_scheduler = [
          end=2),
     # 在 [2, 10) 迭代时使用余弦学习率
     dict(type='CosineAnnealingLR',
-         T_max=10,
+         T_max=8,
          by_epoch= True,
          begin=2,
          end=10,
