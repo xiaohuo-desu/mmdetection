@@ -172,7 +172,7 @@ test_pipeline = [
                    'scale_factor', 'instances'))
 ]
 train_dataloader = dict(  # 训练 dataloader 配置
-    batch_size=16,  # 单个 GPU 的 batch size
+    batch_size=8,  # 单个 GPU 的 batch size
     num_workers=14,  # 单个 GPU 分配的数据加载线程数
     persistent_workers=True,  # 如果设置为 True，dataloader 在迭代完一轮之后不会关闭数据读取的子进程，可以加速训练
     sampler=dict(  # 训练数据的采样器
@@ -187,7 +187,7 @@ train_dataloader = dict(  # 训练 dataloader 配置
         filter_cfg=dict(filter_empty_gt=True, min_size=32),  # 图片和标注的过滤配置
         pipeline=train_pipeline))  # 这是由之前创建的 train_pipeline 定义的数据处理流程。
 val_dataloader = dict(  # 验证 dataloader 配置
-    batch_size=1,  # 单个 GPU 的 Batch size。如果 batch-szie > 1，组成 batch 时的额外填充会影响模型推理精度
+    batch_size=12,  # 单个 GPU 的 Batch size。如果 batch-szie > 1，组成 batch 时的额外填充会影响模型推理精度
     num_workers=14,  # 单个 GPU 分配的数据加载线程数
     persistent_workers=True,  # 如果设置为 True，dataloader 在迭代完一轮之后不会关闭数据读取的子进程，可以加速训练
     drop_last=False,  # 是否丢弃最后未能组成一个批次的数据
@@ -221,7 +221,15 @@ optim_wrapper = dict(  # 优化器封装的配置
         weight_decay=0.0001), # 权重衰减
     clip_grad=None,  # 梯度裁剪的配置，设置为 None 关闭梯度裁剪。使用方法请见 https://mmengine.readthedocs.io/en/latest/tutorials/optimizer.html
     )
-
+"""optim_wrapper = dict(  # 优化器封装的配置
+    type='OptimWrapper',  # 优化器封装的类型。可以切换至 AmpOptimWrapper 来启用混合精度训练
+    optimizer=dict(  # 优化器配置。支持 PyTorch 的各种优化器。请参考 https://pytorch.org/docs/stable/optim.html#algorithms
+        type='SGD',  # 随机梯度下降优化器
+        lr=0.01,  # 基础学习率
+        momentum=0.9,  # 带动量的随机梯度下降
+        weight_decay=0.0001),  # 权重衰减
+    clip_grad=None,  # 梯度裁剪的配置，设置为 None 关闭梯度裁剪。使用方法请见 https://mmengine.readthedocs.io/en/latest/tutorials/optimizer.html
+    )"""
 # iter-based 训练配置
 train_cfg = dict(
     type='EpochBasedTrainLoop',  # iter-based 训练循环
@@ -234,7 +242,7 @@ test_cfg = dict(type='TestLoop')  # 测试循环的类型
 param_scheduler = [
     # 在 [0, 2) 迭代时使用线性学习率
     dict(type='LinearLR',
-         start_factor=0.001,
+         start_factor=0.01,
          by_epoch=True,
          begin=0,
          end=2),
