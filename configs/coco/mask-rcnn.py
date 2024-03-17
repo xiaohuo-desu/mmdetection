@@ -19,7 +19,7 @@ model = dict(
         norm_cfg=dict(type='BN', requires_grad=True),
         norm_eval=True,
         style='pytorch',
-        dcn=dict(type='DCN', deformable_groups=1, fallback_on_stride=False,stage_with_dcn=(False, True, True, True),init_cfg=dict(type='Pretrained', checkpoint='https://download.openmmlab.com/mmdetection/v2.0/dcn/mask_rcnn_r50_fpn_dconv_c3-c5_1x_coco/mask_rcnn_r50_fpn_dconv_c3-c5_1x_coco_20200203-4d9ad43b.pth')),
+        dcn=dict(type='DCN', deformable_groups=1, fallback_on_stride=False,stage_with_dcn=(False, True, True, True)),
         init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),
         
     neck=dict(
@@ -44,7 +44,7 @@ model = dict(
             target_stds=[1.0, 1.0, 1.0, 1.0]),
         loss_cls=dict(
             type='FocalLoss',use_sigmoid=True,loss_weight=1.0),
-        loss_bbox=dict(type='SmoothL1Loss',loss_weight=1.0)),
+        loss_bbox=dict(type='DIoULoss',loss_weight=1.0)),
     roi_head=dict(
         type='StandardRoIHead',
         bbox_roi_extractor=dict(
@@ -65,7 +65,7 @@ model = dict(
             reg_class_agnostic=False,
             loss_cls=dict(
                 type='CrossEntropyLoss',use_sigmoid=False,loss_weight=1.0),
-            loss_bbox=dict(type='SmoothL1Loss', loss_weight=1.0)),
+            loss_bbox=dict(type='DIoULoss', loss_weight=1.0)),
         mask_roi_extractor=dict(
             type='SingleRoIExtractor',
             roi_layer=dict(type='DeformRoIPoolPack', output_size=14,output_channels=256),
@@ -153,7 +153,7 @@ test_pipeline = [
                    'scale_factor', 'instances'))
 ]
 train_dataloader = dict(  # 训练 dataloader 配置
-    batch_size=10,  # 单个 GPU 的 batch size
+    batch_size=12,  # 单个 GPU 的 batch size
     num_workers=8,  # 单个 GPU 分配的数据加载线程数
     persistent_workers=True,  # 如果设置为 True，dataloader 在迭代完一轮之后不会关闭数据读取的子进程，可以加速训练
     sampler=dict(  # 训练数据的采样器
@@ -191,14 +191,17 @@ val_evaluator = dict(  # 验证过程使用的评测器
     metric=['bbox'],#'segm'  # 需要计算的评价指标，`bbox` 用于检测，`segm` 用于实例分割
     format_only=False)
 test_evaluator = val_evaluator  # 测试过程使用的评测器
-auto_scale_lr = dict(enable=True, base_batch_size=10)
+auto_scale_lr = dict(enable=True, base_batch_size=12)
 optim_wrapper = dict(  # 优化器封装的配置
     type='AmpOptimWrapper',  # 优化器封装的类型。可以切换至 AmpOptimWrapper 来启用混合精度训练
     optimizer=dict(  # 优化器配置。支持 PyTorch 的各种优化器。请参考 https://pytorch.org/docs/stable/optim.html#algorithms
         type='Adam',  # 随机梯度下降优化器
-        lr=0.0001,
-        weight_decay=0.0001),  # 权重衰减
-    clip_grad=dict(max_norm=35,norm_type=2)  # 梯度裁剪的配置，设置为 None 关闭梯度裁剪。使用方法请见 https://mmengine.readthedocs.io/en/latest/tutorials/optimizer.html
+        lr=0.001,
+        weight_decay=0.0001, # 权重衰减
+        ), 
+    accumulative_counts=2, #梯度累加
+    clip_grad=None# 梯度裁剪的配置，设置为 None 关闭梯度裁剪。使用方法请见 https://mmengine.readthedocs.io/en/latest/tutorials/optimizer.html
+     
     )
 """optim_wrapper = dict(  # 优化器封装的配置
     type='OptimWrapper',  # 优化器封装的类型。可以切换至 AmpOptimWrapper 来启用混合精度训练
@@ -213,7 +216,7 @@ optim_wrapper = dict(  # 优化器封装的配置
 train_cfg = dict(
     type='EpochBasedTrainLoop',  # iter-based 训练循环
     max_epochs=20,  # 最大迭代次数
-    val_interval=5)  # 每隔多少次进行一次验证
+    val_interval=1)  # 每隔多少次进行一次验证
 
 val_cfg = dict(type='ValLoop')  # 验证循环的类型
 test_cfg = dict(type='TestLoop')  # 测试循环的类型
@@ -221,7 +224,7 @@ test_cfg = dict(type='TestLoop')  # 测试循环的类型
 param_scheduler = [
     # 在[0,500]iterater迭代时使用线性学习率预热
     dict(type='LinearLR',
-         start_factor=0.0001,
+         start_factor=0.001,
          by_epoch=False,
          begin=0,
          end=500),
