@@ -44,7 +44,7 @@ model = dict(
             target_stds=[1.0, 1.0, 1.0, 1.0]),
         loss_cls=dict(
             type='FocalLoss',use_sigmoid=True,loss_weight=1.0),
-        loss_bbox=dict(type='DIoULoss',loss_weight=1.0)),
+        loss_bbox=dict(type='GIoULoss',loss_weight=1.0)),
     roi_head=dict(
         type='StandardRoIHead',
         bbox_roi_extractor=dict(
@@ -65,7 +65,7 @@ model = dict(
             reg_class_agnostic=False,
             loss_cls=dict(
                 type='CrossEntropyLoss',use_sigmoid=False,loss_weight=1.0),
-            loss_bbox=dict(type='DIoULoss', loss_weight=1.0)),
+            loss_bbox=dict(type='GIoULoss', loss_weight=1.0)),
         mask_roi_extractor=dict(
             type='SingleRoIExtractor',
             roi_layer=dict(type='DeformRoIPoolPack', output_size=14,output_channels=256),
