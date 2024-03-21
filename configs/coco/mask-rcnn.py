@@ -241,7 +241,7 @@ optim_wrapper = dict(  # 优化器封装的配置
 # iter-based 训练配置
 train_cfg = dict(
     type='EpochBasedTrainLoop',  # iter-based 训练循环
-    max_epochs=20,  # 最大迭代次数
+    max_epochs=12,  # 最大迭代次数
     val_interval=1)  # 每隔多少次进行一次验证
 
 val_cfg = dict(type='ValLoop')  # 验证循环的类型
