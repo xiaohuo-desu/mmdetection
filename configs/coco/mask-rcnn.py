@@ -251,10 +251,10 @@ test_cfg = dict(type='TestLoop')  # 测试循环的类型
 param_scheduler = [
     # 在 [0, 3) 迭代时使用线性学习率
     dict(type='LinearLR',
-         start_factor=0.01,
-         by_epoch=True,
+         start_factor=0.001,
+         by_epoch=False,
          begin=0,
-         end=4),
+         end=800),
     # 在 [2, 10) 迭代时使用余弦学习率
     dict(type='CosineAnnealingLR',
          T_max=10,
