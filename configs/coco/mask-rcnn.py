@@ -222,7 +222,7 @@ optim_wrapper = dict(  # 优化器封装的配置
     type='OptimWrapper',  # 优化器封装的类型。可以切换至 AmpOptimWrapper 来启用混合精度训练
     optimizer=dict(  # 优化器配置。支持 PyTorch 的各种优化器。请参考 https://pytorch.org/docs/stable/optim.html#algorithms
         type='Adam',  # 随机梯度下降优化器
-        lr=0.004,
+        lr=0.01/5/5,
         betas=(0.9, 0.999),
         eps=1e-08,
         weight_decay=0.0001), # 权重衰减
@@ -249,17 +249,11 @@ test_cfg = dict(type='TestLoop')  # 测试循环的类型
 
 
 param_scheduler = [
-    # 在 [0, 3) 迭代时使用线性学习率
-    dict(type='LinearLR',
-         start_factor=0.001,
-         by_epoch=False,
-         begin=0,
-         end=800),
     # 在 [2, 10) 迭代时使用余弦学习率
     dict(type='CosineAnnealingLR',
-         T_max=18,
+         T_max=15,
          by_epoch= True,
-         begin=10,
+         begin=12,
          end=20,
          convert_to_iter_based=True)
 ]
